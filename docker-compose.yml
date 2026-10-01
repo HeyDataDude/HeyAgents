@@ -1,0 +1,99 @@
+# Council — full local stack.
+#   docker compose up -d
+#
+# Services:
+#   db      PostgreSQL 16 + pgvector
+#   redis   durable job queue + pub/sub for activity streaming
+#   api     FastAPI app (runs migrations + seed on boot)
+#   worker  background job worker (deep research / reports)
+#   web     Next.js frontend
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-council}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-council}
+      POSTGRES_DB: ${POSTGRES_DB:-council}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-council} -d ${POSTGRES_DB:-council}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      COUNCIL_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-council}:${POSTGRES_PASSWORD:-council}@db:5432/${POSTGRES_DB:-council}
+      COUNCIL_DATABASE_URL_SYNC: postgresql+psycopg://${POSTGRES_USER:-council}:${POSTGRES_PASSWORD:-council}@db:5432/${POSTGRES_DB:-council}
+      COUNCIL_STORAGE_LOCAL_DIR: /data/storage
+    command: ["./entrypoint.sh"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - storage_data:/data/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      COUNCIL_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-council}:${POSTGRES_PASSWORD:-council}@db:5432/${POSTGRES_DB:-council}
+      COUNCIL_DATABASE_URL_SYNC: postgresql+psycopg://${POSTGRES_USER:-council}:${POSTGRES_PASSWORD:-council}@db:5432/${POSTGRES_DB:-council}
+      COUNCIL_STORAGE_LOCAL_DIR: /data/storage
+    command: ["python", "-m", "app.workers.worker"]
+    volumes:
+      - storage_data:/data/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  db_data:
+  redis_data:
+  storage_data:

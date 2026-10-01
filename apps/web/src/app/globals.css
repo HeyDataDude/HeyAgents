@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Council design system — calm, dense, premium command-center aesthetic.
+ * Light + dark themes. No neon, minimal visual noise.
+ */
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --bg: 210 20% 98%;
+  --surface: 0 0% 100%;
+  --surface-2: 210 20% 96%;
+  --border: 214 18% 90%;
+  --muted: 215 16% 47%;
+  --fg: 222 30% 14%;
+  --fg-subtle: 220 12% 42%;
+  --accent: 221 70% 52%;
+  --accent-fg: 0 0% 100%;
+}
+
+.dark {
+  --bg: 222 24% 7%;
+  --surface: 222 20% 10%;
+  --surface-2: 222 18% 13%;
+  --border: 222 14% 20%;
+  --muted: 220 10% 60%;
+  --fg: 210 20% 94%;
+  --fg-subtle: 215 14% 68%;
+  --accent: 217 85% 62%;
+  --accent-fg: 222 30% 8%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: hsl(var(--bg));
+  color: hsl(var(--fg));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Thin, unobtrusive scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted));
+  background-clip: content-box;
+}
+
+@layer components {
+  .card {
+    @apply rounded-lg border bg-surface shadow-soft;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border bg-surface px-3 py-1.5
+           text-sm font-medium text-fg transition-colors hover:bg-surface-2
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border-transparent bg-accent text-accent-fg hover:opacity-90;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border bg-surface-2 px-2 py-0.5 text-xs
+           font-medium text-fg-subtle;
+  }
+  .nav-link {
+    @apply flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-fg-subtle
+           transition-colors hover:bg-surface-2 hover:text-fg;
+  }
+  .nav-link-active {
+    @apply bg-surface-2 text-fg;
+  }
+  .input {
+    @apply w-full rounded-md border bg-surface px-3 py-2 text-sm text-fg placeholder:text-muted
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent;
+  }
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-wider text-muted;
+  }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.4); }
+  70% { box-shadow: 0 0 0 14px hsl(var(--accent) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0); }
+}
+.recording-pulse {
+  animation: pulse-ring 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
