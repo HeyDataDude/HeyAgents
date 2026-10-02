@@ -65,6 +65,7 @@ class AgentDispatchStatus(StrEnum):
     PROCESSING = "processing"
     WAITING_FOR_USER = "waiting_for_user"
     COMPLETED = "completed"
+    SKIPPED = "skipped"
     FAILED = "failed"
     CANCELLED = "cancelled"
 

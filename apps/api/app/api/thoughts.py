@@ -31,14 +31,16 @@ async def list_thoughts(
     topic: str | None = None,
     starred: bool | None = None,
     q: str | None = None,
-    limit: int = Query(50, le=200),
-    offset: int = 0,
+    limit: int = Query(50, le=200, ge=1),
+    offset: int = Query(0, ge=0),
 ):
     stmt = select(Thought).order_by(Thought.created_at.desc())
     if status:
         stmt = stmt.where(Thought.status == status)
     if starred is not None:
         stmt = stmt.where(Thought.starred.is_(starred))
+    if q:
+        q = q.replace("\x00", "")
     if q:
         like = f"%{q}%"
         stmt = stmt.where(Thought.title.ilike(like) | Thought.clean_transcript.ilike(like))

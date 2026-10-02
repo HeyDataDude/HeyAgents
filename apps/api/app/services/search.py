@@ -31,7 +31,7 @@ class SearchService:
         self.providers = get_providers()
 
     async def search(self, query: str, *, limit: int = 30) -> list[dict]:
-        q = query.strip()
+        q = query.replace("\x00", "").strip()
         if not q:
             return []
         like = f"%{q}%"

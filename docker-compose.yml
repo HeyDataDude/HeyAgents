@@ -52,7 +52,7 @@ services:
       COUNCIL_STORAGE_LOCAL_DIR: /data/storage
     command: ["./entrypoint.sh"]
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - storage_data:/data/storage
     depends_on:
@@ -74,6 +74,12 @@ services:
       COUNCIL_DATABASE_URL_SYNC: postgresql+psycopg://${POSTGRES_USER:-council}:${POSTGRES_PASSWORD:-council}@db:5432/${POSTGRES_DB:-council}
       COUNCIL_STORAGE_LOCAL_DIR: /data/storage
     command: ["python", "-m", "app.workers.worker"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import sys,glob; sys.exit(0 if any(b'app.workers.worker' in open(p,'rb').read() for p in glob.glob('/proc/[0-9]*/cmdline')) else 1)\""]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 10
     volumes:
       - storage_data:/data/storage
     depends_on:
@@ -81,15 +87,19 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      api:
+        condition: service_healthy
 
   web:
     build:
       context: ./apps/web
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8001
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8001
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - api
 

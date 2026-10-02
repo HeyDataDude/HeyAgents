@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.enums import ResponseMode, ThoughtType
 from app.schemas.common import ORMModel
@@ -47,6 +47,13 @@ class CreateTextThought(BaseModel):
     text: str = Field(min_length=1)
     title: str | None = None
     source: str = "app"
+
+    @field_validator("text", "title")
+    @classmethod
+    def _strip_nul(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return v.replace("\x00", "")
 
 
 class UpdateThought(BaseModel):

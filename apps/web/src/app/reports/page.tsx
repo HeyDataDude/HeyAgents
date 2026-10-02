@@ -1,10 +1,11 @@
 "use client";
 
-import { LayoutGrid, Sparkles } from "lucide-react";
+import { Download, LayoutGrid, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { EmptyState, LoadingBlock } from "@/components/ui/states";
+import { apiUrl } from "@/lib/api";
 import { useGenerateReport, useReports } from "@/lib/hooks";
 import { timeAgo } from "@/lib/utils";
 
@@ -59,7 +60,18 @@ export default function ReportsPage() {
                 </div>
                 <span className="chip capitalize">{r.type}</span>
               </button>
-              {open === r.id && <ReportContent content={r.content} />}
+              {open === r.id && (
+                <>
+                  <ReportContent content={r.content} />
+                  <a
+                    href={apiUrl(`/api/reports/${r.id}/pdf`)}
+                    download
+                    className="btn mt-3 inline-flex w-fit"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Download PDF
+                  </a>
+                </>
+              )}
             </div>
           ))}
         </div>

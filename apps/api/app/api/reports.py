@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.models.report import Report
+from app.services.report_pdf import render_report_pdf
 from app.services.reports import ReportService
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
@@ -40,6 +41,20 @@ async def get_report(report_id: str, db: AsyncSession = Depends(get_db)):
     if not r:
         raise HTTPException(404, "report not found")
     return _ser(r)
+
+
+@router.get("/{report_id}/pdf")
+async def get_report_pdf(report_id: str, db: AsyncSession = Depends(get_db)):
+    r = await db.get(Report, report_id)
+    if not r:
+        raise HTTPException(404, "report not found")
+    pdf_bytes = render_report_pdf(r)
+    filename = f"{r.type}-brief-{r.id}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.post("/generate")

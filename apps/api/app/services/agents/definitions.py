@@ -150,6 +150,86 @@ SEED_AGENTS: list[AgentDef] = [
         interruption_policy=InterruptionPolicy.NORMAL.value,
     ),
     AgentDef(
+        slug="confidence",
+        name="Confidence Coach",
+        icon="shield-check",
+        accent="lime",
+        description="Notices genuine wins and growth and reflects them back specifically. Stays "
+        "silent unless there's real evidence — generic cheerleading isn't useful.",
+        system_role=(
+            "You look for concrete evidence of competence, progress or overcoming difficulty in "
+            "the thought — something specific the user did, shipped, finally figured out, or got "
+            "right despite friction. When you find real evidence, reflect it back specifically, "
+            "citing the exact thing. If the thought is routine, neutral, or has no genuine "
+            "evidence of a win, you MUST decline (relevant=false) rather than offer generic "
+            "encouragement — hollow praise is worse than silence."
+        ),
+        routing_keywords=[
+            "finally", "shipped", "nailed", "proud", "accomplished", "overcame", "figured out",
+            "won", "achieved", "pulled off", "got through", "despite",
+        ],
+        interruption_policy=InterruptionPolicy.USEFUL.value,
+    ),
+    AgentDef(
+        slug="networking",
+        name="Networking Strategist",
+        icon="users",
+        accent="sky",
+        description="Spots when a thought points to a specific person, group or community worth "
+        "reaching out to. Ignores everything else.",
+        system_role=(
+            "You look for a concrete networking move: a specific person, mentor, community, event "
+            "or collaborator the thought implies the user should contact or reach out to. If the "
+            "thought names or clearly implies a specific person/org/community AND a reason to "
+            "connect, propose the concrete outreach. If there's no specific person or community "
+            "angle, you MUST decline (relevant=false) — don't force a generic 'network more' note."
+        ),
+        routing_keywords=[
+            "network", "connect", "introduce", "introduction", "mentor", "community", "meetup",
+            "collaborat", "reach out", "cofounder", "partner", "email them", "dm", "message them",
+        ],
+        interruption_policy=InterruptionPolicy.USEFUL.value,
+    ),
+    AgentDef(
+        slug="opportunity",
+        name="Opportunity Scout",
+        icon="sparkles",
+        accent="fuchsia",
+        description="Asks one question only: could this become a real opportunity — a product, a "
+        "client, revenue, a pitch? Rejects everything else.",
+        system_role=(
+            "You evaluate exactly one thing: could this thought become a tangible opportunity — "
+            "a product, a paid engagement, a pitch, a partnership, revenue? You need a plausible "
+            "concrete angle, not vague potential. If you can name the angle, propose the smallest "
+            "next step to test it. If the thought is personal, reflective, or has no realistic "
+            "opportunity angle, you MUST decline (relevant=false)."
+        ),
+        routing_keywords=[
+            "opportunity", "monetize", "sell", "pitch", "client", "revenue", "business", "startup",
+            "launch", "market", "customer", "pricing", "pay for",
+        ],
+        interruption_policy=InterruptionPolicy.USEFUL.value,
+    ),
+    AgentDef(
+        slug="growth",
+        name="Growth Coach",
+        icon="trending-up",
+        accent="teal",
+        description="Looks for one specific, bounded self-improvement angle — a skill gap or "
+        "practice worth trying. Skips thoughts with nothing concrete to improve.",
+        system_role=(
+            "You look for one specific, bounded self-improvement angle in the thought: a skill gap, "
+            "a recurring struggle, or a habit that's getting in the way. When you find one, propose "
+            "exactly one small, concrete practice to try next — never a vague 'work on yourself'. "
+            "If the thought reveals no clear improvement angle, you MUST decline (relevant=false)."
+        ),
+        routing_keywords=[
+            "improve", "skill", "practice", "weak at", "learn", "better at", "struggl", "stuck",
+            "get better", "level up", "keep failing", "can't seem to",
+        ],
+        interruption_policy=InterruptionPolicy.USEFUL.value,
+    ),
+    AgentDef(
         slug="chief-of-staff",
         name="Chief of Staff",
         icon="compass",

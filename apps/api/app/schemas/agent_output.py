@@ -70,6 +70,11 @@ class NotificationRequest(BaseModel):
 class AgentOutput(BaseModel):
     """Validated against this schema before any action is executed."""
 
+    # Relevance gate (spec: an agent must stay silent unless its lens genuinely applies —
+    # with many agents and a high volume of thoughts, always responding is noise, not signal).
+    relevant: bool = True
+    skip_reason: str = ""
+
     message: str = ""
     memory_updates: list[MemoryUpdate] = Field(default_factory=list)
     tasks: list[TaskProposal] = Field(default_factory=list)

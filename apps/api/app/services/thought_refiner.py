@@ -90,9 +90,9 @@ class ThoughtRefinerService:
         actions = self._actions(sentences)
         topics = self._topics(clean)
         summary = sentences[0] if sentences else clean[:160]
-        title = self._title(topics, summary)
+        title = self._title(summary)
         ttype = self._classify(clean, questions, ideas)
-        importance = 4 if any(_mentions(clean, ("important", "deadline", "urgent"))) else 3
+        importance = 4 if _mentions(clean, ("important", "deadline", "urgent")) else 3
         urgency = 4 if _mentions(clean, ("today", "now", "asap", "deadline")) else 2
         return RefinedThought(
             clean_transcript=clean,
@@ -155,10 +155,14 @@ class ThoughtRefinerService:
                 out.append(s.strip())
         return out[:5]
 
-    def _title(self, topics: list[str], summary: str) -> str:
-        if topics:
-            return " ".join(w.capitalize() for w in topics[:3])
-        return summary[:48].strip() or "Untitled thought"
+    def _title(self, summary: str) -> str:
+        text = summary.strip()
+        if not text:
+            return "Untitled thought"
+        if len(text) <= 60:
+            return text
+        truncated = text[:60].rsplit(" ", 1)[0].strip()
+        return (truncated or text[:60].strip()) + "…"
 
     def _classify(self, text: str, questions, ideas) -> ThoughtType:
         if questions and len(questions) >= 2:

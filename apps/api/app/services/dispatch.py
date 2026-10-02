@@ -94,6 +94,17 @@ class DispatchService:
             ad.started_at = utcnow()
             try:
                 output = await self.runner.run(agent, thought, mode)
+                if not output.relevant:
+                    # The agent's lens genuinely doesn't apply — stay silent rather than add
+                    # noise. No memory/task/connection side effects for a thought it rejected.
+                    ad.output = output.model_dump(mode="json")
+                    ad.response_summary = (
+                        output.skip_reason or "Not relevant to this agent's lens."
+                    )[:280]
+                    ad.status = AgentDispatchStatus.SKIPPED.value
+                    ad.completed_at = utcnow()
+                    completed += 1
+                    continue
                 applied = await apply_agent_output(
                     self.db, agent=agent, thought=thought, output=output
                 )

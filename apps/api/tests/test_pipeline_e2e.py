@@ -47,6 +47,7 @@ async def test_full_voice_thought_loop(db, seeded):
     terminal = {
         AgentDispatchStatus.COMPLETED.value,
         AgentDispatchStatus.WAITING_FOR_USER.value,
+        AgentDispatchStatus.SKIPPED.value,  # agent's lens may genuinely not apply
         AgentDispatchStatus.PROCESSING.value,  # deep mode may still be processing
     }
     assert all(r.status in terminal for r in rows)
